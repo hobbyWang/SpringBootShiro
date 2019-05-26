@@ -33,4 +33,16 @@ public class UserController {
         return "redirect:index";
 
     }
+
+    @RequestMapping("/admin")
+    public String admin(Model model){
+        model.addAttribute("msg", "只对管理员显示");
+        return "admin";
+    }
+
+    @RequestMapping("/logout")
+    public String logout(Model model){
+        model.addAttribute("msg", "注销成功！");
+        return "login";
+    }
 }

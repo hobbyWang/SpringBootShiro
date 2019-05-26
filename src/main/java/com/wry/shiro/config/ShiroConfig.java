@@ -1,7 +1,9 @@
 package com.wry.shiro.config;
 
 import com.wry.shiro.mapper.SysPermissionMapper;
+import com.wry.shiro.mapper.SysRoleMapper;
 import com.wry.shiro.pojo.SysPermission;
+import com.wry.shiro.pojo.SysRole;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
@@ -20,6 +22,9 @@ public class ShiroConfig {
 
     @Autowired
     private SysPermissionMapper sysPermissionMapper;
+
+    @Autowired
+    private SysRoleMapper sysRoleMapper;
 
     /**
      * ShiroFilterFactoryBean
@@ -43,14 +48,17 @@ public class ShiroConfig {
          *      anon:无需认证（登录）可访问
          *      authc:认证才可以
          *      user:如果使用remenberMe的功能才能访问
-         *      perms:得到资源权限可以访问
-         *      role:得到角色权限可以访问
+         *      perms:得到资源权限可以访问 perms[/admin]
+         *      roles:得到角色权限可以访问 roles[ROLE_ADMIN]
          */
         Map<String, String> filterMap = new LinkedHashMap<>();
+        //logout是shiro提供的过滤器
+        filterMap.put("/logout", "logout");
+
         filterMap.put("/css/**", "anon");
         filterMap.put("/login", "anon");
 
-        //根据数据库的资源设置权限
+        //根据数据库的资源设置权限  也可以根据角色设置权限
         List<SysPermission> permissionList = sysPermissionMapper.findByAll(null);
 
         for (SysPermission permission : permissionList) {
@@ -60,6 +68,16 @@ public class ShiroConfig {
                 filterMap.put(permission.getUrl(), permissionValue);
             }
         }
+
+//       url 不能重复
+//        List<SysRole> roleList = sysRoleMapper.findByAll(null);
+//        for (SysRole role : roleList) {
+//            String permissionValue = "roles[" + role.getName() + "]";
+//            for (SysPermission permission : role.getPermissions()) {
+//                //filterMap.put("/admin", "roles[ROLE_ADMIN]");
+//                filterMap.put(permission.getUrl(), permissionValue);
+//            }
+//        }
 
         //所有的其他url都必须认证才能访问
         filterMap.put("/**", "authc");
